@@ -1,0 +1,230 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui" template="template.xhtml">
+
+	<ui:define name="body">
+
+		<f:metadata>
+			<f:viewParam name="id" value="#{organizationDetail.id}" />
+		</f:metadata>
+
+		<link rel="stylesheet" type="text/css" href="style.css" />
+
+
+		<p:panel rendered="#{user.auth!='O'}">
+			<h:outputText value="Bu sayfaya yetkiniz yoktur!"
+				styleClass="notPermitted" />
+		</p:panel>
+		<p:panel rendered="#{organizationDetail.id==null}">
+			<h:outputText value="Sayfaya dışarıdan erişim yapılamaz!"
+				styleClass="notPermitted" />
+		</p:panel>
+		<p:panel id="panel1" rendered="#{(user.auth=='O' or user.auth=='S') and organizationDetail.id!=null}"> 
+			<h:panelGrid columns="2" columnClasses="alignTop,alignTop"
+				style="margin-left:auto;margin-right:auto;">
+
+				<p:panel id="detailMainPanel"
+					style="width:650px;margin-left:auto;margin-right:auto;">
+					<f:facet name="header">
+						Etkinlik Ayrıntıları
+					</f:facet>
+					<h:panelGrid columns="2" columnClasses="alignTop,alignTop">
+						<h:panelGrid columns="1">
+							<p:graphicImage
+								value="/images/#{organizationDetail.organization.imageSmall}"
+								height="260" width="185"
+								rendered="#{organizationDetail.organization.imageSmall!=null}" />
+							<p:graphicImage value="/images/defaultOrganization.png"
+								height="260" width="185"
+								rendered="#{organizationDetail.organization.imageSmall==null}" />
+							<br />
+
+							<p:commandButton value="Küçük Resim Seç"
+								onsuccess="dialogSmallImage.show()" />
+							<p:commandButton value="Büyük Resim Seç"
+								onsuccess="dialogBigImage.show()" />
+							<p:commandButton value="Etkinliği Sil"
+								onsuccess="dialogDelete.show()" />
+
+						</h:panelGrid>
+
+						<p:panel style="width:420px;margin-top:auto;">
+							<p:inplace style="font-size:22px;">
+								<p:inputText value="#{organizationDetail.organization.name}" />
+							</p:inplace>
+							<br />
+							<p:inplace style="font-size:16px;"
+								label="#{organizationDetail.formattedDate}">
+								<p:calendar value="#{organizationDetail.organization.date}"
+									showOn="button" pattern="dd/MM/yyyy HH:mm" stepMinute="5" />
+							</p:inplace>
+							<br />
+							<p:inplace
+								label="#{organizationDetail.organization.gbOrganizationType.name}">
+								<p:selectOneMenu value="#{organizationDetail.organizationType}"
+									style="color:gray;">
+									<f:selectItems value="#{organizationDetail.typeList}"
+										var="type" itemLabel="#{type.name}" itemValue="#{type.name}" />
+								</p:selectOneMenu>
+							</p:inplace>
+							<br />
+							<br />
+
+							<p:inplace>
+								<p:inputText
+									value="#{organizationDetail.organization.description}" />
+							</p:inplace>
+							<br />
+
+							<br />
+							<h:outputText value="Adres: " />
+							<p:inplace>
+								<p:inputText value="#{organizationDetail.organization.address}" />
+							</p:inplace>
+							<br />
+
+							<br />
+							<h:outputText value="Bilet Fiyatı: " />
+							<p:inplace>
+								<p:inputText
+									value="#{organizationDetail.organization.ticketPrice}" />
+							</p:inplace>
+							<br />
+
+							<br />
+							<h:outputText value="Bilet Sayısı: " />
+							<p:inplace>
+								<p:inputText
+									value="#{organizationDetail.organization.numberOfTickets}" />
+							</p:inplace>
+							<br />
+
+							<br />
+							<h:outputText value="Bilet Sıra Sayısı: " />
+							<p:inplace>
+								<p:inputText
+									value="#{organizationDetail.organization.numberOfRows}" />
+							</p:inplace>
+							<br />
+
+							<br />
+							<h:outputText value="Rezervasyon Yapılabilir mi?" /> &nbsp;
+							<p:selectBooleanCheckbox
+								value="#{organizationDetail.organization.canReserved}" />
+							<br />
+							<br />
+							<div align="center">
+
+								<p:commandButton value="Duyuru Yap" style="float:left;"
+									onsuccess="dialogAnnouncement.show()" />
+
+								<p:commandButton value="Bilet Listesi" style="float:center;"
+									onsuccess="dialogTicketList.show()" />
+
+								<p:commandButton value="Güncelle" style="float:right;"
+									actionListener="#{organizationDetail.updateOrganization}"
+									update="detailMainPanel" oncomplete="dialogSuccess.show()" />
+
+							</div>
+						</p:panel>
+					</h:panelGrid>
+				</p:panel>
+			</h:panelGrid>
+		</p:panel>
+
+		<p:dialog widgetVar="dialogAnnouncement" header="Duyuru Ekranı"
+			modal="true" showEffect="fade" hideEffect="fade">
+			<p:growl id="growlAnnouncement" showDetail="true" />
+			<h:panelGrid columns="2">
+				<h:outputText value="Duyuru:" />
+				<p:inputTextarea maxlength="255"
+					value="#{organizationDetail.announcement}" />
+				<p:commandButton value="Kaydet" style="float:right;"
+					actionListener="#{organizationDetail.createAnnouncement}"
+					oncomplete="dialogAnnouncement.hide()" update="@all" />
+			</h:panelGrid>
+		</p:dialog>
+		<p:dialog widgetVar="dialogSmallImage"
+			header="Küçük Resim Seç(185x260)" modal="true" showEffect="fade"
+			hideEffect="fade">
+			<h:panelGrid columns="1">
+				<p:fileUpload
+					fileUploadListener="#{organizationDetail.setSmallImage}"
+					auto="true" mode="advanced" label="Seç" value="Seç"
+					allowTypes="/(\.|\/)(gif|jpe?g|png)$/" />
+				<p:button value="Tamam" outcome="organizationDetail">
+					<f:param name="id" value="#{organizationDetail.id}" />
+				</p:button>
+			</h:panelGrid>
+		</p:dialog>
+		<p:dialog widgetVar="dialogBigImage" header="Büyük Resim Seç(580x300)"
+			modal="true" showEffect="fade" hideEffect="fade">
+			<h:panelGrid columns="1">
+				<p:fileUpload fileUploadListener="#{organizationDetail.setBigImage}"
+					auto="true" mode="advanced" label="Seç" value="Seç"
+					allowTypes="/(\.|\/)(gif|jpe?g|png)$/" />
+				<p:button value="Tamam" outcome="organizationDetail">
+					<f:param name="id" value="#{organizationDetail.id}" />
+				</p:button>
+			</h:panelGrid>
+		</p:dialog>
+		<p:dialog widgetVar="dialogTicketList" header="Bilet Listesi"
+			modal="true" showEffect="fade" hideEffect="fade">
+			<h:panelGrid columns="1">
+				<p:dataTable var="data"
+					value="#{organizationDetail.organization.gbTickets}"
+					style="width:400px;" paginator="true" rows="20">
+					<p:column headerText="Sıra">
+						<h:outputText value="#{data.rowNo}" />
+					</p:column>
+					<p:column headerText="Kolon">
+						<h:outputText value="#{data.seatNo}" />
+					</p:column>
+					<p:column headerText="Durum">
+						<h:outputText value="Satın alınmış" rendered="#{data.status=='B'}" />
+						<h:outputText value="Rezerve edilmiş"
+							rendered="#{data.status=='R'}" />
+						<h:outputText value="İade isteği yapılmış"
+							rendered="#{data.status=='I'}" />
+					</p:column>
+					<p:column headerText="Satın Alan">
+						<h:outputText value="#{data.gbUser.username}"
+							rendered="#{data.gbUser != null}" />
+						<h:outputText value="-" rendered="#{data.gbUser == null}" />
+					</p:column>
+				</p:dataTable>
+			</h:panelGrid>
+		</p:dialog>
+		<p:dialog widgetVar="dialogDelete" header="Silme Onayı" modal="true"
+			showEffect="fade" hideEffect="fade">
+			<h:panelGrid columns="2"
+				rendered="#{organizationDetail.checkOrganizationCanDelete}">
+				<h:outputText value="Etkinliği silmek istediğinizden emin misiniz?" />
+				<p:spacer />
+				<p:commandButton value="Evet" style="float:right;"
+					action="#{organizationDetail.deleteOrganization}" ajax="false" />
+				<p:commandButton value="Hayır" style="float:right;"
+					oncomplete="dialogDelete.hide()" />
+			</h:panelGrid>
+			<h:panelGrid
+				rendered="#{organizationDetail.checkOrganizationCanDelete==false}">
+				<h:outputText
+					value="Etkinlikten bilet alan müşteriler olduğu için silme işlemi yapılamamaktadır." />
+				<p:commandButton value="Tamam" style="float:right;"
+					oncomplete="dialogDelete.hide()" />
+			</h:panelGrid>
+		</p:dialog>
+		<p:dialog widgetVar="dialogSuccess" header="Başarılı" modal="true"
+			showEffect="fade" hideEffect="fade">
+
+			<h:panelGrid columns="1">
+				<h:outputText value="Güncelleme Başarılı" />
+				<p:commandButton value="Tamam" style="float:right;"
+					oncomplete="dialogSuccess.hide()" update=":bodyForm" />
+			</h:panelGrid>
+		</p:dialog>
+	</ui:define>
+</ui:composition>

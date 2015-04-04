@@ -1,0 +1,219 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+</h:head>
+
+<h:body>
+
+	<link rel="stylesheet" type="text/css" href="style.css" />
+
+	<p:panel id="mainPanel">
+	
+		<h:form rendered="#{user.isLogged == false}">
+			<link rel="stylesheet" type="text/css" href="style.css" />
+			<p:panel>
+				<p:spacer height="35" />
+				<p:commandButton value="Üye Ol" onclick="uyeOlDlg.show();"
+					type="button" style="float:right;" />
+				<p:commandButton value="Üye Girişi" onclick="uyeGirisiDlg.show();"
+					type="button" style="float:right;" />
+			</p:panel>
+		</h:form>
+
+		<h:form rendered="#{user.auth == 'O'}">
+			<link rel="stylesheet" type="text/css" href="style.css" />
+			<p:panel>
+				<p:spacer height="35" />
+				<h:outputText style="float:left; font-size:16px;"
+					value="Hoşgeldiniz #{user.user.name} #{user.user.surname}" />
+				<p:commandButton value="Çıkış" style="float:right;"
+					action="#{user.logout()}" update="@all" />
+				<p:commandButton value="Üyelik Bilgilerim" style="float:right;"
+					actionListener="#{user.editUser()}" update=":uyelikBilgilerim"/>
+				<p:commandButton value="Etkinliklerim" style="float:right;"
+					action="listOrganizations?faces-redirect=true" />
+				<p:commandButton value="Etkinlik Ekleme" style="float:right;"
+					action="addOrganization?faces-redirect=true" />
+			</p:panel>
+		</h:form>
+
+		<h:form rendered="#{user.auth == 'S'}">
+			<link rel="stylesheet" type="text/css" href="style.css" />
+			<p:panel>
+				<p:spacer height="35" />
+				<h:outputText style="float:left; font-size:16px;"
+					value="Hoşgeldiniz #{user.user.name} #{user.user.surname}" />
+				<p:commandButton value="Çıkış" style="float:right;"
+					action="#{user.logout()}" update=":mainPanel" />
+				<p:commandButton value="Üyelik Bilgilerim" style="float:right;"
+					actionListener="#{user.editUser()}" update=":uyelikBilgilerim"/>
+				<p:commandButton value="Kulllanıcı Listesi" style="float:right;"
+					action="listUsers?faces-redirect=true" />
+				<p:commandButton value="Etkinlik Listesi" style="float:right;"
+					action="listOrganizations?faces-redirect=true" />
+				<p:commandButton value="İadesi İstenen Biletler"
+					style="float:right;" action="refundTickets?faces-redirect=true" />
+			</p:panel>
+		</h:form>
+		
+		<h:form rendered="#{user.auth == 'C'}">
+			<link rel="stylesheet" type="text/css" href="style.css" />
+			<p:panel>
+				<p:spacer height="35" />
+				<h:outputText style="float:left; font-size:16px;"
+					value="Hoşgeldiniz #{user.user.name} #{user.user.surname}" />
+				<p:commandButton value="Çıkış" style="float:right;"
+					action="#{user.logout()}" update=":mainPanel" />
+				<p:commandButton value="Üyelik Bilgilerim" style="float:right;"
+					actionListener="#{user.editUser()}" update=":uyelikBilgilerim"/>
+				<p:commandButton value="Biletlerim" style="float:right;"
+					action="listTickets?faces-redirect=true" />
+			</p:panel>
+		</h:form>
+	</p:panel>
+	
+	<h:panelGrid columns="2" style="margin-left:auto;margin-right:auto;" columnClasses="topAligned, topAligned">
+		<h:form>
+			<h:panelGrid columns="4" style="margin-left:auto;margin-right:auto;">
+				<p:commandLink action="index?faces-redirect=true">
+					<p:graphicImage value="images/logo.png" />
+				</p:commandLink>
+				<p:spacer width="10" />
+				<p:panelGrid columns="3">
+					<h:outputText value="Etkinlik Arama:" />
+					<p:inputText style="width:300px;" value="#{user.searchString}"/>
+					<p:commandButton value="Ara" action="search?faces-redirect=true"
+						style="float:right" ajax="false"/>
+					<p:commandButton value="Detaylı Arama" action="#{user.searchRedirect}"
+						style="float:right" ajax="false"/>
+				</p:panelGrid>
+				<p:spacer width="150" />
+			</h:panelGrid>
+		</h:form>
+		<p:spacer/>
+		
+		<h:form id="bodyForm">
+			<ui:insert name="body" />
+		</h:form>
+		
+		<h:panelGrid columns="1">
+			<p:panel>
+				<p:calendar value="#{user.startDate}" mode="inline" id="calendar"/>
+			</p:panel>
+			<p:carousel value="#{user.announcementList}" var="ann"
+				autoPlayInterval="5000" effect="easeInStrong" numVisible="1"
+				rendered="#{user.announcementList.size()>0}"
+				itemStyle="width:230px;" rows="1" headerText="Duyurular"
+				circular="true">
+				<h:panelGrid columns="1">
+					<h:outputText value="#{ann.announcement}" style="width:230px;" />
+					<br />
+					<h:outputText value="#{ann.gbOrganization.name}"
+						style="font-size:12;color:gray;text-align:right" />
+				</h:panelGrid>
+			</p:carousel>
+		</h:panelGrid>
+	</h:panelGrid>
+	
+	<p:growl id="wrongCredentials" showDetail="true" />
+	
+	<p:dialog widgetVar="uyeGirisiDlg"
+		header="Üye Girişi" modal="true" showEffect="fade" hideEffect="fade">
+		<h:form>
+			<h:panelGrid columns="2">
+				<h:outputText value="Kullanıcı Adı:" />
+				<p:inputText value="#{user.userName}" required="true" requiredMessage="Kullanıcı adı boş bırakılamaz"/>
+				<h:outputText value="Şifre:" />
+				<p:password value="#{user.cryptedPass}" required="true" requiredMessage="Şifre boş bırakılamaz"/>
+				<p:commandButton value="OK" style="float:right;"
+					actionListener="#{user.login()}"
+					update=":wrongCredentials, :mainPanel, :bodyForm" />
+			</h:panelGrid>
+		</h:form>
+	</p:dialog>
+	
+	<p:dialog widgetVar="uyeOlDlg"
+		header="Yeni Kullanıcı" modal="true" showEffect="fade"
+		hideEffect="fade">
+		<h:form>
+			<p:growl id="newUserError" showDetail="true" />
+			<h:panelGrid columns="2">
+				<h:outputText value="Adınız:" />
+				<p:inputText value="#{user.newUser.name}"/>
+				<h:outputText value="Soyadınız:" />
+				<p:inputText value="#{user.newUser.surname}"/>
+				<h:outputText value="Kullanıcı Adı*:" />
+				<p:inputText value="#{user.newUser.username}" required="true" requiredMessage="Kullanıcı adı boş bırakılamaz"/>
+				<h:outputText value="E-Posta*:" />
+				<p:inputText value="#{user.newUser.email}" required="true" requiredMessage="E-Posta boş bırakılamaz"/>
+				<h:outputText value="Şifre*:" />
+				<p:password value="#{user.newUser.password}" required="true" requiredMessage="Şifre boş bırakılamaz"/>
+				<h:outputText value="Şifre tekrar*:" />
+				<p:password value="#{user.newPassword}" required="true" requiredMessage="Şifre Tekrarı boş bırakılamaz"/>
+				<h:outputText value="Telefon:" />
+				<p:inputText value="#{user.newUser.telephone}"/>
+				<h:outputText value="Kullanıcı Türü*:" />
+				<p:selectOneMenu value="#{user.newUser.role}">
+					<f:selectItem itemLabel="Müşteri" itemValue="C"/>
+					<f:selectItem itemLabel="Organizatör" itemValue="W"/>
+				</p:selectOneMenu>
+				
+				<p:commandButton value="Kaydet" style="float:right;"
+					actionListener="#{user.createNewUser()}"
+					update="newUserError, :mainPanel, :bodyForm" />
+					
+			</h:panelGrid>
+		</h:form>
+	</p:dialog>
+	
+	<p:dialog widgetVar="uyelikBilgilerimDlg" id="uyelikBilgilerim"
+		header="Üye Girişi" modal="true" showEffect="fade" hideEffect="fade" >
+		<h:form>
+			<p:growl id="editError" showDetail="true" />
+			<h:panelGrid columns="2">
+				<h:outputText value="Adınız:" />
+				<p:inputText value="#{user.newUser.name}" />
+				<h:outputText value="Soyadınız:" />
+				<p:inputText value="#{user.newUser.surname}" />
+				<h:outputText value="E-Posta:" />
+				<p:inputText value="#{user.newUser.email}" />
+				<h:outputText value="Telefon:" />
+				<p:inputText value="#{user.newUser.telephone}" />
+				
+				<p:commandButton value="Güncelle" style="float:right;"
+					actionListener="#{user.confirmEdit()}"
+					update="editError, :mainPanel, :bodyForm" />
+					
+				<p:commandLink onclick="sifremiDegistirDlg.show()" style="margin-right:20px;">
+					<h:outputText value="Şifremi Değiştir" />
+				</p:commandLink>
+				
+			</h:panelGrid>
+		</h:form>
+	</p:dialog>
+	
+	<p:dialog widgetVar="sifremiDegistirDlg"
+		header="Şifre Değişimi" modal="true" showEffect="fade" hideEffect="fade" >
+		<h:form>
+			<p:growl id="passwordChangeError" showDetail="true" />
+			<h:panelGrid columns="2">
+				<h:outputText value="Eski Şifre:" />
+				<p:password value="#{user.editOldPassword}"  required="true" requiredMessage="Eski Şifre boş bırakılamaz"/>
+				<h:outputText value="Yeni Şifre:" />
+				<p:password value="#{user.editNewPassword}"  required="true" requiredMessage="Yeni Şifre boş bırakılamaz"/>
+				<h:outputText value="Yeni Şifre Tekrar:" />
+				<p:password value="#{user.editNewPasswordRepeat}"  required="true" requiredMessage="Yeni Şifre Tekrarı boş bırakılamaz"/>
+				
+				<p:commandButton value="Kaydet" style="float:right;"
+					actionListener="#{user.confirmPasswordChange()}"
+					update="passwordChangeError, :mainPanel, :bodyForm" />
+			</h:panelGrid>
+		</h:form>
+	</p:dialog>
+</h:body>
+</html>

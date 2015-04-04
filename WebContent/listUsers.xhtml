@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	template="template.xhtml">
+
+	<ui:define name="body">
+
+		<link rel="stylesheet" type="text/css" href="style.css" />
+		<p:panel rendered="#{user.auth!='S'}">
+			<h:outputText value="Bu sayfaya yetkiniz yoktur!"
+				styleClass="notPermitted" />
+		</p:panel>
+		<p:panel id="panel1" rendered="#{user.auth=='S'}">
+			<h:panelGrid columns="2" columnClasses="alignTop,alignTop"
+				style="margin-left:auto;margin-right:auto;">
+
+				<p:panel style="width:600px;margin-left:auto;margin-right:auto;">
+					<f:facet name="header">
+						<h:outputText value="Kullanıcı Listesi" />
+					</f:facet>
+					
+					<p:dataTable var="data"
+						value="#{listUsers.userList}"
+						style="width:575px;">
+
+						<p:column width="75">
+							<f:facet name="header">
+								<h:outputText value="Kullanıcı Adı" />
+							</f:facet>
+							<h:outputText value="#{data.username}" />
+						</p:column>
+						
+						<p:column width="150">
+							<f:facet name="header">
+								<h:outputText value="E-posta" />
+							</f:facet>
+							<h:outputText value="#{data.email}" />
+						</p:column>
+						
+						<p:column width="75">
+							<f:facet name="header">
+								<h:outputText value="Türü" />
+							</f:facet>
+							<h:outputText rendered="#{data.role == 'O' || data.role == 'W'}" value="Organizatör"/>
+							<h:outputText rendered="#{data.role == 'C'}" value="Kullanıcı"/>
+						</p:column>
+
+						<p:column>
+							<p:commandButton value="Sil" action="#{listUsers.chooseUser(data.id)}"
+								onsuccess="dialogDelete.show()" />
+						</p:column>
+
+						<p:column>
+							<p:commandButton rendered="#{data.role == 'O'}" value="Onaylı" disabled="true"/>
+							<p:commandButton rendered="#{data.role == 'W'}" value="Onayla" 
+								action="#{listUsers.validateOrganizator(data.id)}" update=":bodyForm"/>
+							<p:spacer rendered="#{data.role == 'C'}"/>
+						</p:column>
+					</p:dataTable>
+				</p:panel>
+			</h:panelGrid>
+		</p:panel>
+		
+		<p:dialog widgetVar="dialogDelete" header="Silme Onayı" modal="true"
+			showEffect="fade" hideEffect="fade">
+			<p:growl id="deleteUserError" showDetail="true" />
+			<h:panelGrid columns="2">
+				<h:outputText value="Kullanıcıyı silmek istediğinizden emin misiniz?" />
+				<p:spacer />
+				<p:commandButton value="Evet" style="float:right;"
+					action="#{listUsers.deleteUser()}" update="bodyForm"/>
+				<p:commandButton value="Hayır" style="float:right;"
+					oncomplete="dialogDelete.hide()" />
+			</h:panelGrid>
+		</p:dialog>
+
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	template="template.xhtml">
+
+	<ui:define name="body">
+
+		<link rel="stylesheet" type="text/css" href="style.css" />
+		<p:panel rendered="#{user.auth!='O' and user.auth!='C' and user.auth!='S'}">
+			<h:outputText value="Bu sayfaya yetkiniz yoktur!"
+				styleClass="notPermitted" />
+		</p:panel>
+		<p:panel id="panel1" rendered="#{user.auth=='O' or user.auth=='C' or user.auth=='S'}">
+			<h:panelGrid columns="2" columnClasses="alignTop,alignTop"
+				style="margin-left:auto;margin-right:auto;">
+
+				<p:panel style="margin-left:auto;margin-right:auto;">
+					<f:facet name="header">
+						<h:outputText value="Etkinlik Listesi" />
+					</f:facet>
+					
+					<p:dataTable var="data"
+						value="#{listOrganizations.organizationList}">
+						<p:column>
+							<p:graphicImage value="/images/#{data.imageSmall}" height="40"
+								width="40" rendered="#{data.imageSmall!=null}" />
+							<p:graphicImage value="/images/defaultOrganization.png"
+								height="40" width="40" rendered="#{data.imageSmall==null}" />
+						</p:column>
+
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="Etkinlik Adı" />
+							</f:facet>
+							<h:outputText value="#{data.name}" />
+						</p:column>
+
+						<p:column>
+							<p:button value="Ayrıntılar" outcome="organizationDetail" rendered="#{user.auth=='O'}">
+								<f:param name="id" value="#{data.id}" />
+							</p:button>
+							<p:button value="Ayrıntılar" outcome="organizationDetailC" rendered="#{user.auth=='C'}">
+								<f:param name="id" value="#{data.id}" />
+							</p:button>
+							<p:button value="Ayrıntılar" outcome="organizationDetail" rendered="#{user.auth=='S'}">
+								<f:param name="id" value="#{data.id}" />
+							</p:button>
+						</p:column>
+					</p:dataTable>
+				</p:panel>
+			</h:panelGrid>
+		</p:panel>
+	</ui:define>
+</ui:composition>

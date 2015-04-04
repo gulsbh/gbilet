@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui" template="template.xhtml">
+
+	<ui:define name="body">
+
+		<f:metadata>
+			<f:viewParam name="id" value="#{buyTicket.organizationId}" />
+		</f:metadata>
+
+		<link rel="stylesheet" type="text/css" href="style.css" />
+
+
+		<p:panel rendered="#{user.auth!='C'}">
+			<h:outputText value="Bu sayfaya yetkiniz yoktur!"
+				styleClass="notPermitted" />
+		</p:panel>
+		<p:panel rendered="#{buyTicket.organizationId==null}">
+			<h:outputText value="Sayfaya dışarıdan erişim yapılamaz!"
+				styleClass="notPermitted" />
+		</p:panel>
+		
+		<p:panel id="mainPanel" rendered="#{user.auth=='C' and buyTicket.organizationId!=null}"> 
+			<p:growl id="growl" sticky="true" showDetail="true"/>  
+			
+			<h:panelGrid id="selectSeatPanel" rendered="#{buyTicket.operationStep==1}" 
+				columnClasses="alignTop,alignTop" style="margin-left:auto;margin-right:auto;">
+				
+				<f:facet name="header">
+					<h:outputText value="#{buyTicket.organization.name} -> " style="color:gray"/>
+					<h:outputText value="Koltuk Seçimi -> "/>
+					<h:outputText value="Ödeme ve Onay" style="color:gray"/>
+				</f:facet>
+  				
+				<ui:repeat var="tickets" value="#{buyTicket.ticketList}" varStatus="status">
+  					<h:panelGrid columns="4">
+  						<p:selectBooleanButton onLabel="#{status.index+1}" offLabel="#{status.index+1}" disabled="true" style="width:50px;"/>
+  						<p:spacer width="20"/>
+  						<ui:repeat var="ticket" value="#{tickets}" style="font-size:8px">
+  							<p:selectBooleanButton onLabel="#{ticket.seatNo}" offLabel="#{ticket.seatNo}" value="#{buyTicket.chosenTickets[buyTicket.createKey(ticket.rowNo,ticket.seatNo)]}" 
+  								disabled="#{ticket.gbUser!=null}"/>
+  						</ui:repeat>
+ 						<br/>
+					</h:panelGrid>
+				</ui:repeat>
+				
+				<h:panelGrid columns="2">
+					<p:commandButton value="Rezerve Et" actionListener="#{buyTicket.reserveSelectedTickets}" update="growl" style="float:right" />
+					<p:commandButton value="Ödeme ve Onay" actionListener="#{buyTicket.buySelectedTickets}" update="mainPanel" style="float:right" />
+				</h:panelGrid>
+			</h:panelGrid>
+			
+			<h:panelGrid id="confirmPanel" rendered="#{buyTicket.operationStep==2}" 
+				columnClasses="alignTop,alignTop" style="margin-left:auto;margin-right:auto;">
+				
+				<f:facet name="header">
+					<h:outputText value="#{buyTicket.organization.name} -> " style="color:gray"/>
+					<h:outputText value="Koltuk Seçimi -> " style="color:gray"/>
+					<h:outputText value="Ödeme ve Onay"/>
+				</f:facet> 
+  				
+				<p:dataTable value="#{buyTicket.buyingTickets}" var="ticket">
+					<f:facet name="footer">
+						<h:outputText value="Toplam Bilet Bedeli: #{buyTicket.totalPrice} TL"/>
+					</f:facet>
+					<p:column headerText="Sıra No">
+						<h:outputText value="#{ticket.rowNo}"/>
+					</p:column>
+					<p:column headerText="Koltuk No">
+						<h:outputText value="#{ticket.seatNo}"/>
+					</p:column>
+					<p:column headerText="Fiyat">
+						<h:outputText value="#{buyTicket.organization.ticketPrice}"/>
+					</p:column>
+				</p:dataTable>
+				
+				<h:panelGrid>
+					<p:commandButton value="Ödemeyi Onayla" actionListener="#{buyTicket.confirmSelectedTickets}" style="float:right" update="growl"/>
+				</h:panelGrid>
+			</h:panelGrid>
+		</p:panel>
+		
+		<p:dialog widgetVar="rezerveTamamDlg"
+			header="Başarılı" modal="true" showEffect="fade" hideEffect="fade">
+			<h:form>
+				<h:panelGrid columns="2">
+					<h:outputText value="Seçilen koltuklar için rezervasyon yapıldı" />
+					<p:button value="Tamam" outcome="organizationDetailC">
+						<f:param name="id" value="#{buyTicket.organizationId}" />
+					</p:button>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		
+		<p:dialog widgetVar="satinAlmaTamamDlg"
+			header="Başarılı" modal="true" showEffect="fade" hideEffect="fade">
+			<h:form>
+				<h:panelGrid columns="2">
+					<h:outputText value="Seçilen koltuklar satın alındı" />
+					<p:button value="Tamam" outcome="organizationDetailC">
+						<f:param name="id" value="#{buyTicket.organizationId}" />
+					</p:button>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+	</ui:define>
+</ui:composition>

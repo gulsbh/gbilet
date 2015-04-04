@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui" 
+	template="template.xhtml">
+
+
+	<ui:define name="body">
+
+		<link rel="stylesheet" type="text/css" href="style.css" />
+		<p:panel rendered="#{user.auth!='O'}">
+			<h:outputText value="Bu sayfaya yetkiniz yoktur!"
+				styleClass="notPermitted" />
+		</p:panel>
+		<p:panel id="panel1" rendered="#{user.auth=='O'}">
+			<h:panelGrid id="panel2" columns="2"
+				columnClasses="alignTop,alignTop"
+				style="margin-left:auto;margin-right:auto;">
+
+				<p:panel id="mainPanel"
+					style="width:500px;margin-left:auto;margin-right:auto;">
+					<f:facet name="header">
+						<h:outputText value="Etkinlik Ekleme" />
+					</f:facet>
+
+					<p:growl id="growl" showDetail="false" />
+					<h:panelGrid id="formPanel" columns="2" cellspacing="10">
+
+						<h:outputText value="Adı:" />
+						<p:inputText id="name"
+							value="#{addOrganization.newOrganization.name}" required="true"
+							label="Adı" requiredMessage="Lütfen etkinlik adını giriniz.">
+							<f:validateRequired />
+						</p:inputText>
+
+						<h:outputText value="Adresi:" />
+						<p:inputText id="address"
+							value="#{addOrganization.newOrganization.address}"
+							required="true" label="Adres"
+							requiredMessage="Lütfen etkinlik adresini giriniz.">
+							<f:validateRequired />
+						</p:inputText>
+
+						<h:outputText value="Açıklama:" />
+						<p:inputTextarea
+							value="#{addOrganization.newOrganization.description}" rows="4" />
+
+						<h:outputText value="Tarih:" />
+						<p:calendar value="#{addOrganization.newOrganization.date}"
+							showOn="button" pattern="dd/MM/yyyy HH:mm" required="true"
+							requiredMessage="Lütfen etkinlik tarihini giriniz."
+							stepMinute="5" />
+
+						<h:outputText value="Bilet Fiyatı:" />
+						<p:inputText id="ticketPrice"
+							value="#{addOrganization.newOrganization.ticketPrice}"
+							required="true" label="Bilet Fiyatı"
+							requiredMessage="Lütfen bilet fiyatını giriniz.">
+							<f:convertNumber />
+							<f:validateRequired />
+						</p:inputText>
+
+						<h:outputText value="Bilet Sayısı:" />
+						<p:inputText id="numberOfTickets"
+							value="#{addOrganization.newOrganization.numberOfTickets}"
+							required="true" label="Bilet Sayısı"
+							requiredMessage="Lütfen bilet sayısını giriniz.">
+							<f:convertNumber />
+							<f:validateRequired />
+						</p:inputText>
+
+						<h:outputText value="Bilet Sıra Sayısı:" />
+						<p:inputText id="numberOfRows"
+							value="#{addOrganization.newOrganization.numberOfRows}"
+							required="true" label="Bilet Sıra Sayısı"
+							requiredMessage="Lütfen bilet sıra sayısını giriniz.">
+							<f:convertNumber />
+							<f:validateLongRange minimum="1" />
+							<f:validateRequired />
+						</p:inputText>
+
+						<h:panelGrid columns="2" cellspacing="5">
+							<h:outputText value="Organizasyon Türü:" />
+							<p:selectOneMenu value="#{addOrganization.organizationType}"
+								required="true"
+								requiredMessage="Lütfen etkinlik türünü seçiniz.">
+								<f:selectItems value="#{addOrganization.typeList}" var="type"
+									itemLabel="#{type.name}" itemValue="#{type.name}"
+									noSelectionValue="Seçiniz" />
+							</p:selectOneMenu>
+						</h:panelGrid>
+
+						<h:panelGrid columns="2" cellspacing="5">
+							<p:selectBooleanCheckbox
+								value="#{addOrganization.newOrganization.canReserved}"
+								required="true"
+								requiredMessage="Lütfen etkinliğe rezervasyon yapılabilir mi belirtiniz." />
+							<h:outputText value="Rezervasyon Yapılabilsin mi?" />
+						</h:panelGrid>
+
+						<p:commandButton value="Kaydet ve Resim Ekle"
+							actionListener="#{addOrganization.saveOrganization}"
+							onsuccess="addImageDlg.show();" />
+						<p:commandButton value="Resim Eklemeden Kaydet"
+							actionListener="#{addOrganization.saveOrganization}"
+							onsuccess="organizationSuccessDlg.show()" />
+
+						<p:dialog header="" modal="true" showEffect="fade"
+							hideEffect="fade" widgetVar="organizationSuccessDlg">
+							<h:panelGrid columns="1">
+								<h:outputText value="Etkinlik Başarıyla Eklendi" />
+								<p:commandButton value="Tamam" action="listOrganizations.jsf?faces-redirect=true" />
+
+							</h:panelGrid>
+						</p:dialog>
+					</h:panelGrid>
+				</p:panel>
+			</h:panelGrid>
+		</p:panel>
+
+		<p:dialog header="" modal="true" showEffect="fade" hideEffect="fade"
+			widgetVar="addImageDlg">
+
+			<h:panelGrid id="formPanel2" columns="2" cellspacing="10">
+				<h:outputText value="Küçük Resim Seç(185x260):" />
+				<p:fileUpload fileUploadListener="#{addOrganization.setSmallImage}"
+					auto="true" mode="advanced" label="Seç" value="Seç"
+					allowTypes="/(\.|\/)(gif|jpe?g|png)$/" />
+
+				<h:outputText value="Büyük Resim Seç(580x300):" />
+				<p:fileUpload fileUploadListener="#{addOrganization.setBigImage}"
+					auto="true" mode="advanced" label="Seç" value="Seç"
+					allowTypes="/(\.|\/)(gif|jpe?g|png)$/" />
+
+				<p:commandButton value="Kaydet"
+					actionListener="#{addOrganization.saveImages}"
+					onsuccess="imageSuccessDlg.show()" />
+			</h:panelGrid>
+		</p:dialog>
+		<p:dialog header="" modal="true" showEffect="fade" hideEffect="fade"
+			widgetVar="imageSuccessDlg">
+			<h:panelGrid columns="1">
+				<h:outputText value="Resimler Başarıyla Eklendi" />
+				<p:commandButton value="Tamam" action="listOrganizations.jsf?faces-redirect=true"/>
+			</h:panelGrid>
+		</p:dialog>
+	</ui:define>
+</ui:composition>
+

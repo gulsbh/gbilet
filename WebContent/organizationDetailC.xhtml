@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui" template="template.xhtml">
+
+	<ui:define name="body">
+
+		<f:metadata>
+			<f:viewParam name="id" value="#{organizationDetailC.id}" />
+		</f:metadata>
+
+		<link rel="stylesheet" type="text/css" href="style.css" />
+
+
+		<p:panel rendered="#{user.auth!='C'}">
+			<h:outputText value="Bu sayfaya yetkiniz yoktur!"
+				styleClass="notPermitted" />
+		</p:panel>
+		<p:panel rendered="#{organizationDetailC.id==null}">
+			<h:outputText value="Sayfaya dışarıdan erişim yapılamaz!"
+				styleClass="notPermitted" />
+		</p:panel>
+		<p:panel id="panel1" rendered="#{user.auth=='C' and organizationDetailC.id!=null}"> 
+			<h:panelGrid columns="2" columnClasses="alignTop,alignTop"
+				style="margin-left:auto;margin-right:auto;">
+
+				<p:panel id="detailMainPanel"
+					style="width:650px;margin-left:auto;margin-right:auto;">
+					<f:facet name="header">
+						Etkinlik Ayrıntıları
+					</f:facet>
+					<h:panelGrid columns="2" columnClasses="alignTop,alignTop">
+						<h:panelGrid columns="1">
+							<p:graphicImage
+								value="/images/#{organizationDetailC.organization.imageSmall}"
+								height="260" width="185"
+								rendered="#{organizationDetailC.organization.imageSmall!=null}" />
+							<p:graphicImage value="/images/defaultOrganization.png"
+								height="260" width="185"
+								rendered="#{organizationDetailC.organization.imageSmall==null}" />
+							<br />
+
+						</h:panelGrid>
+
+						<p:panel style="width:420px;margin-top:auto;">
+							<h:outputText value="#{organizationDetailC.organization.name}" style="font-size:22px;"/>
+							<br />
+							<h:outputText value="#{organizationDetailC.organization.date}" style="font-size:16px;">
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+							</h:outputText>
+							<br />
+							<h:outputText value="#{organizationDetailC.organization.gbOrganizationType.name}" style="color:gray;"/>
+							<br />
+							<br />
+							<h:outputText value="#{organizationDetailC.organization.description}" />
+							<br />
+							<br />
+							<h:outputText value="Adres: #{organizationDetailC.organization.address}" />
+							<br />
+							<br />
+							<h:outputText value="Bilet Fiyatı: #{organizationDetailC.organization.ticketPrice} TL" />
+							<br />
+							<br />
+							
+							<div align="center">
+								<p:button value="Bilet Al/Rezerve Et" rendered="#{!organizationDetailC.canBuy}" disabled="true"
+								style="float:right;" outcome="buyTicket">
+									<f:param name="id" value="#{organizationDetailC.organization.id}" />
+								</p:button>
+								
+								<p:button value="Bilet Al/Rezerve Et" rendered="#{organizationDetailC.canBuy}"
+								style="float:right;" outcome="buyTicket">
+									<f:param name="id" value="#{organizationDetailC.organization.id}" />
+								</p:button>
+								<br />
+							<br />
+							</div>
+						</p:panel>
+					</h:panelGrid>
+				</p:panel>
+			</h:panelGrid>
+		</p:panel>		
+		
+	</ui:define>
+</ui:composition>

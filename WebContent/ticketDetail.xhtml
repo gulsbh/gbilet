@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui" template="template.xhtml">
+
+	<ui:define name="body">
+
+		<f:metadata>
+			<f:viewParam name="id" value="#{ticketDetail.id}" />
+		</f:metadata>
+
+		<link rel="stylesheet" type="text/css" href="style.css" />
+
+
+		<p:panel rendered="#{user.auth!='C'}">
+			<h:outputText value="Bu sayfaya yetkiniz yoktur!"
+				styleClass="notPermitted" />
+		</p:panel>
+		<p:panel rendered="#{ticketDetail.id==null}">
+			<h:outputText value="Sayfaya dışarıdan erişim yapılamaz!"
+				styleClass="notPermitted" />
+		</p:panel>
+		<p:panel id="panel1"
+			rendered="#{user.auth=='C' and ticketDetail.id!=null}">
+			<p:panel id="detailMainPanel"
+				style="margin-left:auto;margin-right:auto;">
+				<f:facet name="header">
+						Bilet Ayrıntıları
+					</f:facet>
+				<h:panelGrid columns="2" columnClasses="alignTop,alignTop">
+					<h:panelGrid columns="1">
+						<p:graphicImage
+							value="/images/#{ticketDetail.ticket.gbOrganization.imageSmall}"
+							height="260" width="185"
+							rendered="#{ticketDetail.ticket.gbOrganization.imageSmall!=null}" />
+						<p:graphicImage value="/images/defaultOrganization.png"
+							height="260" width="185"
+							rendered="#{ticketDetail.ticket.gbOrganization.imageSmall==null}" />
+						<br />
+					</h:panelGrid>
+
+					<p:panel style="margin-top:auto;">
+						<h:outputText value="#{ticketDetail.ticket.gbOrganization.name}"
+							style="font-size:22px;" />
+						<br />
+						<br />
+						<h:outputText style="font-size:16px;"
+							value="#{ticketDetail.formattedDate}" />
+						<br />
+						<br />
+						<h:outputText
+							value="#{ticketDetail.ticket.gbOrganization.gbOrganizationType.name}" />
+						<br />
+						<br />
+
+						<h:outputText style="font-size:16px;color:blue;"
+							value="Sıra No: #{ticketDetail.ticket.rowNo}" />
+						<br />
+
+						<h:outputText style="font-size:16px;color:blue;"
+							value="Koltuk No: #{ticketDetail.ticket.seatNo}" />
+						<br />
+						<br />
+						<br />
+
+						<p:commandButton value="İade İsteği Gönder"
+							rendered="#{!ticketDetail.canRefund}" disabled="true" />
+
+						<p:commandButton value="İade İsteği Gönder"
+							rendered="#{ticketDetail.canRefund}"
+							onsuccess="dialogRefund.show()" />
+
+					</p:panel>
+				</h:panelGrid>
+			</p:panel>
+		</p:panel>
+
+		<p:dialog widgetVar="dialogRefund" header="İade Onayı" modal="true"
+			showEffect="fade" hideEffect="fade">
+			<h:panelGrid columns="2"
+				rendered="#{ticketDetail.checkTicketCanRefund}">
+				<h:outputText value="Bileti iade etmek istediğinizden emin misiniz?" />
+				<p:spacer />
+				<p:commandButton value="Evet" style="float:right;"
+					action="#{ticketDetail.refundTicket}" ajax="false" />
+				<p:commandButton value="Hayır" style="float:right;"
+					oncomplete="dialogRefund.hide()" />
+			</h:panelGrid>
+			<h:panelGrid rendered="#{ticketDetail.checkTicketCanRefund==false}">
+				<h:outputText
+					value="Etkinliğe 1 gün kalmıştır. İade işlemi yapılamamaktadır." />
+				<p:commandButton value="Tamam" style="float:right;"
+					oncomplete="dialogRefund.hide()" />
+			</h:panelGrid>
+		</p:dialog>
+	</ui:define>
+</ui:composition>

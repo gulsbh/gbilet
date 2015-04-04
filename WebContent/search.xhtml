@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	template="template.xhtml">
+
+	<ui:define name="body">
+		
+		<f:metadata>
+			<f:viewParam name="searchType" value="#{search.searchType}" />
+			<f:viewParam name="searchString" value="#{search.searchString}" />
+		</f:metadata>
+		
+		<link rel="stylesheet" type="text/css" href="style.css" />
+		
+		<p:panel id="panel1">
+			<h:panelGrid columnClasses="alignTop,alignTop"
+				style="margin-left:auto;margin-right:auto;">
+				
+				
+				<h:panelGrid columns="3" width="100%" rendered="#{search.searchType eq null or search.searchType == ''}">
+					<h:outputText value="Organizasyon: " style="width:50%"/>
+					<p:inputText value="#{search.searchString}" style="width:50%"/>
+					<p:spacer/>
+					
+					<h:outputText value="Başlangıç Tarihi: " style="width:50%"/>
+					<p:calendar value="#{search.startDate}"
+							showOn="button" pattern="dd/MM/yyyy" style="width:50%"/>
+					<p:spacer/>
+					
+					<h:outputText value="Bitiş Tarihi: "/>
+					<p:calendar value="#{search.endDate}"
+							showOn="button" pattern="dd/MM/yyyy" />
+					<p:spacer/>
+					
+					<h:outputText value="Tür: "/>
+					<p:selectOneMenu value="#{search.typeId}">
+						<f:selectItem itemLabel="Konser" itemValue="1"/>
+						<f:selectItem itemLabel="Sinema" itemValue="2"/>
+						<f:selectItem itemLabel="Tiyatro" itemValue="3"/>
+					</p:selectOneMenu>
+					<p:commandButton value="Ara" style="float:right;"
+						actionListener="#{search.doSearch()}"
+						update="bodyForm" />
+				</h:panelGrid>
+				
+				<p:panel style="margin-left:auto;margin-right:auto;">
+					<f:facet name="header">
+						<h:outputText value="#{search.searchString} anahtar kelimesine göre bulunan sonuçlar" rendered="#{search.searchString == 'S'}"/>
+						<h:outputText value="#{search.startDate} günündeki organizasyonlar" rendered="#{search.searchString == 'S'}"/>
+						<h:outputText value="Etkinlik Listesi" rendered="#{search.searchString == ''}"/>
+					</f:facet>
+					
+					<p:dataTable var="data"
+						value="#{search.organizationList}"
+						style="width:475px;">
+						<p:column>
+							<p:graphicImage value="/images/#{data.imageSmall}" height="40"
+								width="40" rendered="#{data.imageSmall!=null}" />
+							<p:graphicImage value="/images/defaultOrganization.png"
+								height="40" width="40" rendered="#{data.imageSmall==null}" />
+						</p:column>
+
+						<p:column width="230">
+							<f:facet name="header">
+								<h:outputText value="Etkinlik Adı" />
+							</f:facet>
+							<h:outputText value="#{data.name}" />
+						</p:column>
+
+						<p:column>
+							<p:button value="Ayrıntılar" outcome="organizationDetail" rendered="#{user.auth=='O'}">
+								<f:param name="id" value="#{data.id}" />
+							</p:button>
+							<p:button value="Ayrıntılar" outcome="organizationDetailC" rendered="#{user.auth=='C'}">
+								<f:param name="id" value="#{data.id}" />
+							</p:button>
+						</p:column>
+					</p:dataTable>
+				</p:panel>
+			</h:panelGrid>
+
+		</p:panel>
+
+
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	template="template.xhtml">
+
+	<ui:define name="body">
+
+		<link rel="stylesheet" type="text/css" href="style.css" />
+		<p:panel rendered="#{user.auth!='S'}">
+			<h:outputText value="Bu sayfaya yetkiniz yoktur!"
+				styleClass="notPermitted" />
+		</p:panel>
+		<p:panel id="panel1" rendered="#{user.auth=='S'}">
+			<p:growl id="validateRefundTicketsError" showDetail="true" />
+			<h:panelGrid columns="2" columnClasses="alignTop,alignTop"
+				style="margin-left:auto;margin-right:auto;">
+				
+				<p:panel style="width:650px;margin-left:auto;margin-right:auto;">
+					<f:facet name="header">
+						<h:outputText value="İadesi İstenen Biletler" />
+					</f:facet>
+					
+					<p:dataTable var="data"
+						value="#{refundTickets.refundTicketList}"
+						style="width:575px;">
+
+						<p:column width="75">
+							<f:facet name="header">
+								<h:outputText value="Bilet Sahibi" />
+							</f:facet>
+							<h:outputText value="#{data.gbUser.username}" />
+						</p:column>
+						
+						<p:column width="150">
+							<f:facet name="header">
+								<h:outputText value="Organizasyon Adı" />
+							</f:facet>
+							<h:outputText value="#{data.gbOrganization.name}" />
+						</p:column>
+						
+						<p:column width="150">
+							<f:facet name="header">
+								<h:outputText value="Organizasyon Tarihi" />
+							</f:facet>
+							<h:outputText value="#{data.gbOrganization.date}" />
+						</p:column>
+						
+						<p:column width="75">
+							<f:facet name="header">
+								<h:outputText value="Bilet Yeri" />
+							</f:facet>
+							<h:outputText value="#{data.rowNo} - #{data.seatNo}" />
+						</p:column>
+
+						<p:column>
+							<p:commandButton value="Onayla" 
+								action="#{refundTickets.validateRefundTicket(data.id)}" update=":bodyForm"/>
+						</p:column>
+					</p:dataTable>
+				</p:panel>
+			</h:panelGrid>
+		</p:panel>
+	</ui:define>
+</ui:composition>
